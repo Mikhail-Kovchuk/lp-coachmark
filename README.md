@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/logo-300x300.png" alt="lp-coachmark" width="120" />
+  <img src="https://raw.githubusercontent.com/Mikhail-Kovchuk/lp-coachmark/main/assets/logo-300x300.png" alt="lp-coachmark" width="120" />
   <h1>lp-coachmark</h1>
   <p>Portable guided tour (coachmark) system for React Native / Expo Router apps.</p>
   <p>
@@ -20,9 +20,9 @@ Highlights a UI element with a spotlight cutout, shows a tooltip with title and 
 <div align="center">
   <table>
     <tr>
-      <td align="center"><img src="assets/ex1.png" width="220" alt="Theme step" /></td>
-      <td align="center"><img src="assets/ex2.png" width="220" alt="Calendar legend step" /></td>
-      <td align="center"><img src="assets/ex3.png" width="220" alt="Circle spotlight" /></td>
+      <td align="center"><img src="https://raw.githubusercontent.com/Mikhail-Kovchuk/lp-coachmark/main/assets/ex1.png" width="220" alt="Theme step" /></td>
+      <td align="center"><img src="https://raw.githubusercontent.com/Mikhail-Kovchuk/lp-coachmark/main/assets/ex2.png" width="220" alt="Calendar legend step" /></td>
+      <td align="center"><img src="https://raw.githubusercontent.com/Mikhail-Kovchug/lp-coachmark/main/assets/ex3.png" width="220" alt="Circle spotlight" /></td>
     </tr>
     <tr>
       <td align="center"><sub>Tooltip on any UI element</sub></td>
