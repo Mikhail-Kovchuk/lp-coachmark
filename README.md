@@ -6,9 +6,9 @@
     <a href="https://www.npmjs.com/package/lp-coachmark"><img src="https://img.shields.io/npm/v/lp-coachmark?color=7c3aed&style=flat-square" alt="npm version" /></a>
     <a href="https://www.npmjs.com/package/lp-coachmark"><img src="https://img.shields.io/npm/dm/lp-coachmark?color=7c3aed&style=flat-square" alt="npm downloads" /></a>
     <img src="https://img.shields.io/badge/React%20Native-%E2%89%A50.73-blue?style=flat-square" alt="React Native" />
-    <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" />
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="License" /></a>
   </p>
-  <p>📖 <a href="docs/index.html"><strong>Full documentation →</strong></a></p>
+  <p>📖 <a href="https://mikhail-kovchuk.github.io/lp-coachmark/"><strong>Full documentation →</strong></a></p>
 </div>
 
 ---
@@ -150,10 +150,10 @@ start('home', 0, () => console.log('tour finished'));
 | `useCoachmarkStep` | Hook | Register a single step and get a `ref` |
 | `useTabCoachmark` | Hook | Auto-start tour on tab focus |
 
-See the **[full documentation](docs/index.html)** for the complete prop / option reference and real-world usage patterns.
+See the **[full documentation](https://mikhail-kovchuk.github.io/lp-coachmark/)** for the complete prop / option reference and real-world usage patterns.
 
 ---
 
 ## License
 
-MIT
+[MIT](./LICENSE)
