@@ -22,21 +22,27 @@ export function useTabCoachmark(tabKey: string) {
         try {
           await _config.storage?.set(dbKey, '1');
         } catch {
-          // ігноруємо
+          // ignore
         }
       }
 
       async function check() {
+        // Start the timer immediately — do not wait for storage
+        timeoutRef.current = setTimeout(() => {
+          timeoutRef.current = null;
+          start(tabKey, 0, markDone);
+        }, delay);
+
+        // Concurrently check if the tour has already been completed
         try {
-          let done: string | null = null;
-          if (_config.storage) {
-            done = await _config.storage.get(dbKey);
-          }
-          if (_config.alwaysShow || !done) {
-            timeoutRef.current = setTimeout(() => {
+          if (!_config.alwaysShow && _config.storage) {
+            const done = await _config.storage.get(dbKey);
+            if (done && timeoutRef.current !== null) {
+              // Tour already completed — cancel the timer
+              clearTimeout(timeoutRef.current);
               timeoutRef.current = null;
-              start(tabKey, 0, markDone);
-            }, delay);
+              visitCount.current -= 1;
+            }
           }
         } catch (e) {
           console.log('[lp-coachmark] check() error:', e);

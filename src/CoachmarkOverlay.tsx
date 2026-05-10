@@ -8,6 +8,7 @@ import {
   Animated,
   Dimensions,
   Easing,
+  Image,
   Modal,
   Platform,
   Pressable,
@@ -25,11 +26,13 @@ const TOOLTIP_ARROW_SIZE = 10;
 const SPOTLIGHT_BORDER_RADIUS = 14;
 const SPOTLIGHT_PADDING_DEFAULT = 8;
 
-// ── Час анімації — редагуй тут ───────────────────────────────────────────────
-const TOOLTIP_IN_DURATION  = 1200;  // мс — поява tooltip (fade + slide + scale)
-const TOOLTIP_OUT_DURATION = 600;   // мс — зникнення tooltip
-const OVERLAY_IN_DURATION  = 800;   // мс — поява overlay + бордера (перший показ і кожен крок)
-const OVERLAY_OUT_DURATION = 600;   // мс — зникнення overlay + бордера при переході
+// ── Animation durations — edit here ─────────────────────────────────────────
+const TOOLTIP_IN_DURATION       = 1200; // ms — tooltip appear on step transitions
+const TOOLTIP_IN_DURATION_FIRST = 100;  // ms — first tooltip appear (fast, no delay)
+const TOOLTIP_OUT_DURATION      = 600;  // ms — tooltip fade out
+const OVERLAY_IN_DURATION       = 800;  // ms — overlay appear on transitions
+const OVERLAY_IN_DURATION_FIRST = 300;  // ms — overlay appear on first show
+const OVERLAY_OUT_DURATION      = 600;  // ms — overlay + border fade out on transition
 
 interface Props {
   step: CoachmarkStep;
@@ -68,11 +71,11 @@ interface SpotlightMaskProps {
 }
 
 /**
- * Темний overlay з "вирізаним" прямокутником.
- * Реалізація: 4 темних шматки навколо підсвіченого блоку + рамка-glow.
- * Root НЕ має backgroundColor — він прозорий, щоб "дірка" була видна.
+ * Dark overlay with a "cutout" rectangle.
+ * Implementation: 4 dark pieces around the highlighted block + glow border.
+ * Root has NO backgroundColor — it is transparent so the "hole" is visible.
  */
-const SCREEN_CLAMP_MARGIN = 8; // мінімальний відступ від краю екрану при clampToScreen
+const SCREEN_CLAMP_MARGIN = 8; // minimum margin from screen edge when clampToScreen is true
 
 function spotlightGeometry(
   measure: CoachmarkMeasure,
@@ -150,7 +153,7 @@ function SpotlightGlow({ measure, padding, shape, clampToScreen }: SpotlightMask
 
 // ─── Tooltip ──────────────────────────────────────────────────────────────────
 
-// ─── TapHand — мигаюча рука поверх spotlight ─────────────────────────────────
+// ─── TapHand — pulsing hand over the spotlight ──────────────────────────────
 
 interface TapHandProps {
   measure: CoachmarkMeasure;
@@ -169,30 +172,39 @@ function TapHand({ measure, padding }: TapHandProps) {
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(bounceAnim, {
-          toValue: -12, duration: 380,
+          toValue: -14, duration: 420,
           easing: Easing.out(Easing.quad), useNativeDriver: true,
         }),
         Animated.timing(bounceAnim, {
-          toValue: 0, duration: 380,
+          toValue: 0, duration: 420,
           easing: Easing.in(Easing.quad), useNativeDriver: true,
         }),
-        Animated.delay(350),
+        Animated.delay(150),
       ])
     );
     loop.start();
     return () => loop.stop();
   }, [bounceAnim, fadeAnim]);
 
-  const centerX = measure.x + measure.width / 2 - 20;
-  const topY    = measure.y + measure.height + padding + 4;
+  const SIZE_W = 56;
+  const SIZE_H = 84;
+  const centerX = measure.x + measure.width / 2 - SIZE_W / 2 + 32;
+  const topY    = measure.y + measure.height + padding - 10;
 
   return (
-    <Animated.Text
-      style={[styles.tapHandEmoji, { opacity: fadeAnim, left: centerX, top: topY, transform: [{ translateY: bounceAnim }] }]}
+    <Animated.View
+      style={[
+        styles.tapHandContainer,
+        { opacity: fadeAnim, left: centerX, top: topY, transform: [{ translateY: bounceAnim }] },
+      ]}
       pointerEvents="none"
     >
-      👆
-    </Animated.Text>
+      <Image
+        source={require('./handle-tap.png')}
+        style={{ width: SIZE_W, height: SIZE_H }}
+        resizeMode="contain"
+      />
+    </Animated.View>
   );
 }
 
@@ -257,7 +269,7 @@ function Tooltip({
       <View style={styles.tooltipHeader}>
         <Text style={styles.tooltipTitle}>{step.title}</Text>
         <TouchableOpacity onPress={onSkip} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Text style={styles.skipText}>Пропустити</Text>
+          <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>
       </View>
 
@@ -272,11 +284,11 @@ function Tooltip({
         <View style={styles.navBtns}>
           {currentIndex > 0 && !step.hidePrev && (
             <TouchableOpacity style={styles.prevBtn} onPress={onPrev} activeOpacity={0.8}>
-              <Text style={styles.prevBtnText}>Назад</Text>
+              <Text style={styles.prevBtnText}>Back</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity style={styles.nextBtn} onPress={onNext} activeOpacity={0.8}>
-            <Text style={styles.nextBtnText}>{isLast ? 'Готово' : 'Далі'}</Text>
+            <Text style={styles.nextBtnText}>{isLast ? 'Done' : 'Next'}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -295,8 +307,13 @@ export default function CoachmarkOverlay({
   onPrev,
   onSkip,
 }: Props) {
-  const [measure, setMeasure] = useState<CoachmarkMeasure | null>(null);
   const [prevIndex, setPrevIndex] = useState(currentIndex);
+  const [displayed, setDisplayed] = useState<{ step: CoachmarkStep; measure: CoachmarkMeasure | null }>({
+    step,
+    measure: null,
+  });
+  const displayedStep = displayed.step;
+  const measure = displayed.measure;
 
   const overlayFade = useRef(new Animated.Value(0)).current;
   const tooltipFade = useRef(new Animated.Value(0)).current;
@@ -304,7 +321,10 @@ export default function CoachmarkOverlay({
   const tooltipScale = useRef(new Animated.Value(0.88)).current;
   const spotlightScale = useRef(new Animated.Value(1.06)).current;
 
-  const animateIn = useCallback(() => {
+  const animateIn = useCallback((isFirst = false) => {
+    const tooltipDur = isFirst ? TOOLTIP_IN_DURATION_FIRST : TOOLTIP_IN_DURATION;
+    const overlayDur = isFirst ? OVERLAY_IN_DURATION_FIRST : OVERLAY_IN_DURATION;
+
     tooltipFade.setValue(0);
     tooltipSlide.setValue(16);
     tooltipScale.setValue(0.86);
@@ -315,31 +335,31 @@ export default function CoachmarkOverlay({
       Animated.parallel([
         Animated.timing(overlayFade, {
           toValue: 1,
-          duration: OVERLAY_IN_DURATION,
+          duration: overlayDur,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
         Animated.timing(tooltipFade, {
           toValue: 1,
-          duration: TOOLTIP_IN_DURATION,
+          duration: tooltipDur,
           easing: Easing.out(Easing.cubic),
           useNativeDriver: true,
         }),
         Animated.timing(tooltipSlide, {
           toValue: 0,
-          duration: TOOLTIP_IN_DURATION,
+          duration: tooltipDur,
           easing: Easing.out(Easing.back(1.4)),
           useNativeDriver: true,
         }),
         Animated.timing(tooltipScale, {
           toValue: 1,
-          duration: TOOLTIP_IN_DURATION,
+          duration: tooltipDur,
           easing: Easing.out(Easing.back(1.4)),
           useNativeDriver: true,
         }),
         Animated.timing(spotlightScale, {
           toValue: 1,
-          duration: TOOLTIP_IN_DURATION,
+          duration: tooltipDur,
           easing: Easing.out(Easing.back(1.2)),
           useNativeDriver: true,
         }),
@@ -374,23 +394,26 @@ export default function CoachmarkOverlay({
     ]).start(cb);
   }, [overlayFade, tooltipFade, tooltipSlide, tooltipScale]);
 
-  // Завантаження координат + автоскрол
+  // Load coordinates + auto-scroll
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      await new Promise<void>((r) => setTimeout(r, 80));
+      const isTransition = currentIndex !== prevIndex;
+      // First step: minimal delay; step transition: wait for render
+      await new Promise<void>((r) => setTimeout(r, isTransition ? 80 : 16));
       if (cancelled) return;
 
-      const isTransition = currentIndex !== prevIndex;
-
-      // 1. Спочатку ховаємо поточний tooltip якщо це перехід між кроками
+      // 1. Hide current content if this is a step transition
       if (isTransition) {
+        // Instantly clear content (hand/tooltip/spotlight) — dark overlay fades separately
+        setDisplayed(prev => ({ ...prev, measure: null }));
         await new Promise<void>((r) => animateOut(r));
         if (cancelled) return;
+        setDisplayed({ step, measure: null });
       }
 
-      // 2. Скролимо до нового елементу
+      // 2. Scroll to the new element
       const screenH = SCREEN.height;
       const visibleBottom = screenH - tabBarHeight;
       const m = await measureTarget(step);
@@ -405,13 +428,13 @@ export default function CoachmarkOverlay({
         if (cancelled) return;
       }
 
-      // 3. Фінальний замір після скролу → показуємо
+      // 3. Final measure after scroll → show
       const finalM = await measureTarget(step);
       if (cancelled) return;
 
-      setMeasure(finalM);
+      setDisplayed({ step, measure: finalM });
       setPrevIndex(currentIndex);
-      animateIn();
+      animateIn(!isTransition);
     }
 
     void load();
@@ -427,9 +450,9 @@ export default function CoachmarkOverlay({
     }).start(onSkip);
   }, [overlayFade, onSkip]);
 
-  const padding = step.padding ?? SPOTLIGHT_PADDING_DEFAULT;
-  const shape = step.shape ?? 'rect';
-  const clampToScreen = step.clampToScreen ?? false;
+  const padding = displayedStep.padding ?? SPOTLIGHT_PADDING_DEFAULT;
+  const shape = displayedStep.shape ?? 'rect';
+  const clampToScreen = displayedStep.clampToScreen ?? false;
 
   return (
     <Modal
@@ -439,14 +462,14 @@ export default function CoachmarkOverlay({
       statusBarTranslucent
       onRequestClose={handleSkip}
     >
-      {/* Темний overlay — прозорий фон, маска малює темні шматки */}
+      {/* Dark overlay — transparent background, mask draws dark pieces */}
       <Animated.View
         style={[styles.root, { opacity: overlayFade }]}
         pointerEvents="box-none"
       >
-        {/* Блокує тапи скрізь — при tapHint не рендеримо щоб SpotlightTapZone отримав події */}
-        {!step.tapHint && <Pressable style={StyleSheet.absoluteFill} onPress={() => {}} />}
-        {/* Блокує тапи по tab bar (Modal не перекриває його на деяких платформах) */}
+        {/* Blocks all taps — not rendered in tapHint mode so SpotlightTapZone receives events */}
+        {!displayedStep.tapHint && <Pressable style={StyleSheet.absoluteFill} onPress={() => {}} />}
+        {/* Blocks taps on tab bar (Modal does not cover it on some platforms) */}
         <View
           style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: tabBarHeight }}
           pointerEvents="box-only"
@@ -458,35 +481,35 @@ export default function CoachmarkOverlay({
               style={[StyleSheet.absoluteFill, { transform: [{ scale: spotlightScale }] }]}
               pointerEvents="none"
             >
-              <SpotlightMask measure={measure} padding={padding} shape={shape} clampToScreen={clampToScreen} />
+              <SpotlightMask measure={measure} padding={displayedStep.padding ?? SPOTLIGHT_PADDING_DEFAULT} shape={displayedStep.shape ?? 'rect'} clampToScreen={displayedStep.clampToScreen ?? false} />
             </Animated.View>
             <Animated.View
               style={[StyleSheet.absoluteFill, { transform: [{ scale: spotlightScale }] }]}
               pointerEvents="none"
             >
-              <SpotlightGlow measure={measure} padding={padding} shape={shape} clampToScreen={clampToScreen} />
+              <SpotlightGlow measure={measure} padding={displayedStep.padding ?? SPOTLIGHT_PADDING_DEFAULT} shape={displayedStep.shape ?? 'rect'} clampToScreen={displayedStep.clampToScreen ?? false} />
             </Animated.View>
           </>
         )}
 
-        {/* tapHint: прозорий Pressable на spotlight + мигаюча рука */}
-        {measure && step.tapHint && (
+        {/* tapHint: transparent Pressable on spotlight + pulsing hand */}
+        {measure && displayedStep.tapHint && (
           <>
             <SpotlightTapZone
               measure={measure}
-              padding={padding}
-              shape={shape}
-              clampToScreen={clampToScreen}
-              onPress={() => step.onTap?.()}
+              padding={displayedStep.padding ?? SPOTLIGHT_PADDING_DEFAULT}
+              shape={displayedStep.shape ?? 'rect'}
+              clampToScreen={displayedStep.clampToScreen ?? false}
+              onPress={() => displayedStep.onTap?.()}
             />
-            <TapHand measure={measure} padding={padding} />
+            <TapHand measure={measure} padding={displayedStep.padding ?? SPOTLIGHT_PADDING_DEFAULT} />
           </>
         )}
 
-        {/* Звичайний крок — tooltip */}
-        {measure && !step.tapHint && (
+        {/* Regular step — tooltip */}
+        {measure && !displayedStep.tapHint && (
           <Tooltip
-            step={step}
+            step={displayedStep}
             measure={measure}
             currentIndex={currentIndex}
             totalSteps={totalSteps}
@@ -508,7 +531,7 @@ export default function CoachmarkOverlay({
 const styles = StyleSheet.create({
   root: {
     ...StyleSheet.absoluteFillObject,
-    // НЕ має backgroundColor — щоб spotlight "дірка" була видна через прозорий фон
+    // No backgroundColor — so the spotlight "hole" is visible through the transparent background
     zIndex: 9999,
   },
   maskPiece: {
@@ -627,9 +650,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 50,
   },
-  tapHandEmoji: {
+  tapHandContainer: {
     position: 'absolute',
-    fontSize: 36,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
+    elevation: 8,
   },
   nextBtnText: {
     color: '#FFFFFF',

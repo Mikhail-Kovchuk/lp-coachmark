@@ -15,6 +15,9 @@
     "onboarding",
     "spotlight"
   ],
+  "scripts": {
+    "version": "node scripts/update-version.js && git add docs/index.html"
+  },
   "license": "MIT",
   "peerDependencies": {
     "expo-router": ">=3.0.0",

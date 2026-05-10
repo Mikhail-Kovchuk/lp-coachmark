@@ -14,30 +14,30 @@ const CoachmarkContext = createContext<CoachmarkContextValue | null>(null);
 interface Props {
   children: ReactNode;
   /**
-   * Висота tab bar (включаючи safe area insets.bottom).
-   * Використовується для блокування тапів по tab bar під час туру.
+   * Height of the tab bar (including safe area insets.bottom).
+   * Used to block taps on the tab bar during the tour.
    * Default: 0
    */
   tabBarHeight?: number;
   /**
-   * Вимкнути всі тури. Default: true
+   * Disable all tours. Default: true
    */
   enabled?: boolean;
   /**
-   * Завжди показувати тур, ігноруючи збережений стан. Default: false
-   * Використовується для розробки.
+   * Always show the tour, ignoring the saved state. Default: false
+   * Useful for development.
    */
   alwaysShow?: boolean;
   /**
-   * Адаптер для збереження стану "тур показано".
-   * Якщо не передано — стан не зберігається (тур буде показуватись щоразу).
+   * Adapter for saving the "tour shown" state.
+   * If not provided — state is not saved (the tour will be shown every time).
    *
    * @example
    * // AsyncStorage
    * storage={{ get: AsyncStorage.getItem, set: AsyncStorage.setItem }}
    *
    * @example
-   * // expo-sqlite через власні функції
+   * // expo-sqlite via custom functions
    * storage={{ get: (key) => getSetting(db, key), set: (key, val) => saveSetting(db, key, val) }}
    */
   storage?: CoachmarkStorage;

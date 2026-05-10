@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lp-coachmark — Documentation</title>
+  <link rel="icon" type="image/jpeg" href="../assets/coachmark.jpg" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0c0c0c;
+      --sidebar-bg: #111111;
+      --surface:    #181818;
+      --border:     #252525;
+      --text:       #d4d4d8;
+      --text-muted: #71717a;
+      --text-head:  #fafafa;
+      --accent:     #f59e0b;
+      --accent-dim: rgba(245,158,11,0.12);
+      --code-bg:    #1a1a1a;
+      --radius:     8px;
+      --sidebar-w:  260px;
+      --toc-w:      220px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────── */
+    #sidebar {
+      width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      overflow-y: auto;
+      z-index: 100;
+      padding-bottom: 40px;
+    }
+
+    #sidebar-header {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--sidebar-bg);
+      z-index: 1;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-head);
+      letter-spacing: -0.3px;
+    }
+
+    .logo-version {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    nav { padding: 16px 0; }
+
+    .nav-group-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 12px 20px 6px;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 6px 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s, background 0.15s;
+      border-left: 2px solid transparent;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+      background: var(--surface);
+    }
+
+    .nav-link.active {
+      color: var(--accent);
+      background: var(--accent-dim);
+      border-left-color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ── Main layout ─────────────────────────────────────── */
+    #content-wrap {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      min-width: 0;
+      margin-top: 52px;
+    }
+
+    #main {
+      flex: 1;
+      max-width: 860px;
+      padding: 40px 48px 56px;
+      min-width: 0;
+    }
+
+    /* ── TOC ─────────────────────────────────────────────── */
+    #toc {
+      width: var(--toc-w);
+      flex-shrink: 0;
+      padding: 56px 24px 40px 0;
+    }
+
+    #toc-inner {
+      position: sticky;
+      top: 32px;
+    }
+
+    #toc-inner h4 {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toc-link {
+      display: block;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 3px 0 3px 12px;
+      border-left: 1.5px solid var(--border);
+      transition: color 0.15s, border-color 0.15s;
+      line-height: 1.5;
+    }
+
+    .toc-link:hover { color: var(--text); border-left-color: #444; }
+    .toc-link.active { color: var(--accent); border-left-color: var(--accent); }
+
+    /* ── Typography ──────────────────────────────────────── */
+    .page-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--text-head);
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-head);
+      margin-top: 56px;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: -0.2px;
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-head);
+      margin-top: 32px;
+      margin-bottom: 12px;
+    }
+
+    p { margin-bottom: 14px; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    strong { color: var(--text-head); font-weight: 600; }
+
+    /* ── Intro paragraph ─────────────────────────────────── */
+    .intro {
+      font-size: 16px;
+      color: #a1a1aa;
+      margin-bottom: 32px;
+      line-height: 1.8;
+    }
+
+    /* ── Feature pills ───────────────────────────────────── */
+    .feature-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 36px;
+    }
+
+    .feature-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    /* ── Callout / Note ──────────────────────────────────── */
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+
+    .callout-icon { font-style: normal; margin-right: 6px; }
+
+    /* ── Code ────────────────────────────────────────────── */
+    pre[class*="language-"] {
+      background: var(--code-bg) !important;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px !important;
+      font-size: 13.5px !important;
+      margin: 16px 0 24px !important;
+      overflow-x: auto;
+      line-height: 1.65 !important;
+    }
+
+    code:not([class]) {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      color: #e879f9;
+    }
+
+    code[class*="language-"],
+    pre[class*="language-"] code {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace !important;
+    }
+
+    /* ── Tables ──────────────────────────────────────────── */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0 28px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    thead {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    td {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.6;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tr:hover td { background: rgba(255,255,255,0.02); }
+
+    td code:not([class]) {
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+
+    .req-yes {
+      color: #34d399;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .req-no {
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .default-val {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Step badge ──────────────────────────────────────── */
+    .steps { margin: 24px 0 32px; }
+
+    .step {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #000;
+      font-size: 13px;
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    .step-body { flex: 1; }
+
+    .step-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-head);
+      margin-bottom: 4px;
+    }
+
+    .step-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* ── Section divider ─────────────────────────────────── */
+    hr.divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    /* ── Top bar ──────────────────────────────────────────── */
+    #topbar {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-w);
+      right: 0;
+      height: 52px;
+      background: rgba(12,12,12,0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      padding: 0 48px;
+    }
+
+    /* ── Search ───────────────────────────────────────────── */
+    #search-wrap {
+      position: relative;
+      width: 500px;
+      max-width: 100%;
+    }
+
+    #search-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 7px 80px 7px 34px;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    #search-input::placeholder { color: var(--text-muted); }
+
+    #search-input:focus { border-color: var(--accent); }
+
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-55%);
+      color: var(--text-muted);
+      pointer-events: none;
+      font-size: 24px;
+    }
+
+    .search-kbd {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 3px;
+      pointer-events: none;
+    }
+
+    .search-kbd kbd {
+      background: var(--border);
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: inherit;
+      line-height: 1.6;
+    }
+
+    #search-results {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      width: 420px;
+      background: #1c1c1c;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      z-index: 200;
+      max-height: 360px;
+      overflow-y: auto;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+      display: none;
+    }
+
+    #search-results.open { display: block; }
+
+    .sr-empty {
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .sr-item {
+      display: block;
+      padding: 10px 16px;
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+
+    .sr-item:last-child { border-bottom: none; }
+
+    .sr-item:hover, .sr-item.sr-focused {
+      background: var(--surface);
+    }
+
+    .sr-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-head);
+      margin-bottom: 2px;
+    }
+
+    .sr-excerpt {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    mark {
+      background: rgba(245,158,11,0.35);
+      color: var(--accent);
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+
+    /* ── Scrollbar ───────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #444; }
+
+    @media (max-width: 1100px) {
+      #toc { display: none; }
+    }
+
+    @media (max-width: 720px) {
+      #sidebar { transform: translateX(-100%); }
+      #topbar { left: 0; padding: 0 16px; }
+      #content-wrap { margin-left: 0; }
+      #main { padding: 32px 20px; }
+      #search-results { width: calc(100vw - 32px); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ SIDEBAR ══════════════════════════════════ -->
+<aside id="sidebar">
+  <div id="sidebar-header">
+    <a class="logo" href="#intro">
+      <div class="logo-icon"><img src="../assets/coachmark.jpg" alt="lp-coachmark" style="width:100%;height:100%;object-fit:cover;border-radius:8px;display:block;" /></div>
+      <div>
+        <div class="logo-text">lp-coachmark</div>
+        <div class="logo-version">v1.0</div>
+      </div>
+    </a>
+  </div>
+
+  <nav>
+    <div class="nav-group-label">Getting Started</div>
+    <a class="nav-link" href="#intro">Introduction</a>
+    <a class="nav-link" href="#installation">Installation</a>
+    <a class="nav-link" href="#quick-start">Quick start</a>
+    <a class="nav-link" href="#storage">Storage adapters</a>
+
+    <div class="nav-group-label">API</div>
+    <a class="nav-link" href="#provider">CoachmarkProvider</a>
+    <a class="nav-link" href="#use-step">useCoachmarkStep</a>
+    <a class="nav-link" href="#use-tab">useTabCoachmark</a>
+    <a class="nav-link" href="#use-coachmark">useCoachmark</a>
+    <a class="nav-link" href="#types">Types</a>
+
+    <div class="nav-group-label">Examples</div>
+    <a class="nav-link" href="#ex-basic">Basic step</a>
+    <a class="nav-link" href="#ex-multiple">Multiple steps</a>
+    <a class="nav-link" href="#ex-circle">Circle spotlight</a>
+    <a class="nav-link" href="#ex-scroll">Auto-scroll</a>
+    <a class="nav-link" href="#ex-taphint">tapHint mode</a>
+    <a class="nav-link" href="#ex-conditional">Conditional step</a>
+    <a class="nav-link" href="#ex-manual">Manual trigger</a>
+    <a class="nav-link" href="#ex-after">afterFinish</a>
+  </nav>
+</aside>
+
+<!-- ═══════════════════════════════ TOP BAR ══════════════════════════════════ -->
+<div id="topbar">
+  <div id="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input id="search-input" type="search" placeholder="Search docs…" autocomplete="off" spellcheck="false" />
+    <span class="search-kbd"><kbd>Ctrl</kbd><kbd>⇧</kbd><kbd>F</kbd></span>
+    <div id="search-results"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ CONTENT ══════════════════════════════════ -->
+<div id="content-wrap">
+  <main id="main">
+
+    <!-- ─── Introduction ─────────────────────────────────── -->
+    <section id="intro">
+      <div class="page-label">Documentation</div>
+      <h1>lp-coachmark</h1>
+      <p class="intro">
+        A portable guided tour (coachmark) system for <strong>React Native</strong> and
+        <strong>Expo Router</strong> apps. Highlights any <code>View</code> with a spotlight
+        cutout and walks users through onboarding steps tab by tab.
+      </p>
+
+      <div class="feature-list">
+        <span class="feature-pill">✦ Rect &amp; circle spotlight</span>
+        <span class="feature-pill">✦ Auto-scroll support</span>
+        <span class="feature-pill">✦ tapHint mode</span>
+        <span class="feature-pill">✦ Per-tab tours</span>
+        <span class="feature-pill">✦ Pluggable storage</span>
+        <span class="feature-pill">✦ Zero native modules</span>
+        <span class="feature-pill">✦ Animated transitions</span>
+      </div>
+    </section>
+
+    <!-- ─── Installation ──────────────────────────────────── -->
+    <section id="installation">
+      <h2>Installation</h2>
+
+      <pre><code class="language-bash">npm install lp-coachmark
+# or
+yarn add lp-coachmark</code></pre>
+
+      <h3>Peer dependencies</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Package</th>
+              <th>Minimum version</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>react</code></td><td>18.0.0</td></tr>
+            <tr><td><code>react-native</code></td><td>0.73.0</td></tr>
+            <tr><td><code>expo-router</code></td><td>3.0.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── Quick start ───────────────────────────────────── -->
+    <section id="quick-start">
+      <h2>Quick start</h2>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Wrap your root layout with <code>CoachmarkProvider</code></div>
+            <div class="step-desc">This must be an ancestor of every screen that uses coachmarks.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Call <code>useCoachmarkStep()</code> inside screen components</div>
+            <div class="step-desc">Each call registers one step and returns a <code>ref</code> to attach to a View.</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Add <code>useTabCoachmark(tabKey)</code> to auto-start</div>
+            <div class="step-desc">The tour starts automatically the first time the user visits the tab.</div>
+          </div>
+        </div>
+      </div>
+
+      <pre><code class="language-tsx">// app/_layout.tsx
+import { CoachmarkProvider } from 'lp-coachmark';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+export default function RootLayout() {
+  return (
+    &lt;CoachmarkProvider
+      tabBarHeight={84}
+      storage={{
+        get: AsyncStorage.getItem,
+        set: AsyncStorage.setItem,
+      }}
+    &gt;
+      &lt;Stack /&gt;
+    &lt;/CoachmarkProvider&gt;
+  );
+}</code></pre>
+
+      <pre><code class="language-tsx">// app/(tabs)/home.tsx
+import { View, TouchableOpacity, Text } from 'react-native';
+import { useCoachmarkStep, useTabCoachmark } from 'lp-coachmark';
+
+export default function HomeScreen() {
+  useTabCoachmark('home');
+
+  const addRef = useCoachmarkStep({
+    key: 'home-add-btn',
+    tabKey: 'home',
+    title: 'Create your first item',
+    description: 'Tap this button to get started.',
+  });
+
+  return (
+    &lt;View style={{ flex: 1 }}&gt;
+      &lt;TouchableOpacity ref={addRef}&gt;
+        &lt;Text&gt;+ Add&lt;/Text&gt;
+      &lt;/TouchableOpacity&gt;
+    &lt;/View&gt;
+  );
+}</code></pre>
+
+      <div class="callout">
+        <span class="callout-icon">💡</span>
+        During development, pass <code>alwaysShow={true}</code> to <code>CoachmarkProvider</code> to bypass
+        the "already shown" storage check and replay the tour on every launch.
+      </div>
+    </section>
+
+    <!-- ─── Storage ───────────────────────────────────────── -->
+    <section id="storage">
+      <h2>Storage adapters</h2>
+      <p>
+        The <code>storage</code> prop accepts any object that implements
+        <code>get(key)</code> and <code>set(key, value)</code> — both returning Promises.
+        This makes the library compatible with any persistence layer.
+      </p>
+
+      <h3>AsyncStorage</h3>
+      <pre><code class="language-tsx">import AsyncStorage from '@react-native-async-storage/async-storage';
+
+&lt;CoachmarkProvider
+  storage={{
+    get: AsyncStorage.getItem,
+    set: AsyncStorage.setItem,
+  }}
+&gt;</code></pre>
+
+      <h3>expo-sqlite (custom functions)</h3>
+      <pre><code class="language-tsx">&lt;CoachmarkProvider
+  storage={{
+    get: (key) =&gt; getSetting(db, key),
+    set: (key, value) =&gt; saveSetting(db, key, value),
+  }}
+&gt;</code></pre>
+
+      <div class="callout">
+        <span class="callout-icon">ℹ️</span>
+        If <code>storage</code> is omitted, tour completion is not persisted — tours will re-run on every app launch.
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ─── CoachmarkProvider ─────────────────────────────── -->
+    <section id="provider">
+      <h2>CoachmarkProvider</h2>
+      <p>Root context provider. Must wrap every screen that uses coachmarks.</p>
+
+      <pre><code class="language-tsx">import { CoachmarkProvider } from 'lp-coachmark';
+
+&lt;CoachmarkProvider
+  tabBarHeight={84}
+  enabled={true}
+  alwaysShow={false}
+  storage={{ get, set }}
+&gt;
+  {children}
+&lt;/CoachmarkProvider&gt;</code></pre>
+
+      <h3>Props</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Prop</th>
+              <th>Type</th>
+              <th style="text-align:center">Required</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>children</code></td>
+              <td><code>ReactNode</code></td>
+              <td class="req-yes">✓</td>
+              <td class="default-val">—</td>
+              <td>App content.</td>
+            </tr>
+            <tr>
+              <td><code>tabBarHeight</code></td>
+              <td><code>number</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">0</td>
+              <td>Height of the tab bar including safe-area inset. Blocks taps on the tab bar while the overlay is active.</td>
+            </tr>
+            <tr>
+              <td><code>enabled</code></td>
+              <td><code>boolean</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">true</td>
+              <td>Master switch. Set to <code>false</code> to disable all tours globally (e.g. for users who have completed onboarding).</td>
+            </tr>
+            <tr>
+              <td><code>alwaysShow</code></td>
+              <td><code>boolean</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">false</td>
+              <td>Ignore the "already shown" flag in storage. Useful during development.</td>
+            </tr>
+            <tr>
+              <td><code>storage</code></td>
+              <td><code>CoachmarkStorage</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">undefined</td>
+              <td>Adapter for persisting tour completion. If omitted, tours run on every app launch.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── useCoachmarkStep ──────────────────────────────── -->
+    <section id="use-step">
+      <h2>useCoachmarkStep</h2>
+      <p>
+        Registers a single coachmark step and returns a <code>ref</code> to attach to the
+        target <code>View</code>.
+      </p>
+
+      <pre><code class="language-tsx">import { useCoachmarkStep } from 'lp-coachmark';
+
+const ref = useCoachmarkStep({
+  key: 'home-button',
+  tabKey: 'home',
+  title: 'Add item',
+  description: 'Tap to create a new item.',
+});
+
+return &lt;View ref={ref}&gt;...&lt;/View&gt;;</code></pre>
+
+      <h3>Options</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Option</th>
+              <th>Type</th>
+              <th style="text-align:center">Required</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>key</code></td>
+              <td><code>string</code></td>
+              <td class="req-yes">✓</td>
+              <td class="default-val">—</td>
+              <td>Unique identifier for this step. Steps are displayed in the order they were registered (i.e., hook call order).</td>
+            </tr>
+            <tr>
+              <td><code>tabKey</code></td>
+              <td><code>string</code></td>
+              <td class="req-yes">✓</td>
+              <td class="default-val">—</td>
+              <td>The tab this step belongs to. Must match the value passed to <code>useTabCoachmark</code> and <code>start()</code>.</td>
+            </tr>
+            <tr>
+              <td><code>title</code></td>
+              <td><code>string</code></td>
+              <td class="req-yes">✓</td>
+              <td class="default-val">—</td>
+              <td>Heading text shown in the tooltip.</td>
+            </tr>
+            <tr>
+              <td><code>description</code></td>
+              <td><code>string</code></td>
+              <td class="req-yes">✓</td>
+              <td class="default-val">—</td>
+              <td>Body text shown in the tooltip.</td>
+            </tr>
+            <tr>
+              <td><code>shape</code></td>
+              <td><code>'rect' | 'circle'</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">'rect'</td>
+              <td>Shape of the spotlight cutout. Use <code>'circle'</code> for icon buttons or avatar-like elements.</td>
+            </tr>
+            <tr>
+              <td><code>padding</code></td>
+              <td><code>number</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">8</td>
+              <td>Extra space (px) around the target element inside the spotlight.</td>
+            </tr>
+            <tr>
+              <td><code>scrollRef</code></td>
+              <td><code>RefObject&lt;ScrollView&gt;</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">—</td>
+              <td>Ref of the <code>ScrollView</code> that contains this element. When provided, the overlay auto-scrolls to make the element visible.</td>
+            </tr>
+            <tr>
+              <td><code>scrollOffset</code></td>
+              <td><code>number</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">center</td>
+              <td>Custom scroll offset relative to the element. Defaults to centering the element on screen.</td>
+            </tr>
+            <tr>
+              <td><code>clampToScreen</code></td>
+              <td><code>boolean</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">false</td>
+              <td>Clamp the spotlight to screen boundaries on the X axis. Use when the target element is wider than the screen.</td>
+            </tr>
+            <tr>
+              <td><code>tapHint</code></td>
+              <td><code>boolean</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">false</td>
+              <td>
+                Enables "do it yourself" mode: the overlay shows the spotlight mask and a pulsing hand icon instead of a tooltip.
+                Call <code>resumeAfterTap()</code> inside <code>onTap</code> to advance to the next step.
+              </td>
+            </tr>
+            <tr>
+              <td><code>onTap</code></td>
+              <td><code>() =&gt; void</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">—</td>
+              <td>Called when the user taps the spotlight zone in <code>tapHint</code> mode. Perform the action here, then call <code>resumeAfterTap()</code>.</td>
+            </tr>
+            <tr>
+              <td><code>hidePrev</code></td>
+              <td><code>boolean</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">false</td>
+              <td>Hide the "Back" button on this step. Useful for the first step or steps that follow a <code>tapHint</code> step.</td>
+            </tr>
+            <tr>
+              <td><code>enabled</code></td>
+              <td><code>boolean</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">true</td>
+              <td>When <code>false</code>, the step is not registered. Use to conditionally include steps based on feature flags or user roles.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── useTabCoachmark ───────────────────────────────── -->
+    <section id="use-tab">
+      <h2>useTabCoachmark</h2>
+      <p>
+        Automatically starts the tour when the screen tab gains focus. Checks storage to
+        ensure the tour runs only once per user.
+      </p>
+
+      <pre><code class="language-tsx">import { useTabCoachmark } from 'lp-coachmark';
+
+export default function HomeScreen() {
+  useTabCoachmark('home');
+  // ...
+}</code></pre>
+
+      <h3>Parameters</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Type</th>
+              <th style="text-align:center">Required</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>tabKey</code></td>
+              <td><code>string</code></td>
+              <td class="req-yes">✓</td>
+              <td>The tab identifier. Must match the <code>tabKey</code> used in <code>useCoachmarkStep</code> calls on this screen.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <span class="callout-icon">⏱</span>
+        <strong>Timing:</strong> first visit — 100 ms delay. Subsequent visits in the same session — 1 200 ms delay
+        (gives navigation animation time to complete before the overlay appears).
+      </div>
+    </section>
+
+    <!-- ─── useCoachmark ──────────────────────────────────── -->
+    <section id="use-coachmark">
+      <h2>useCoachmark</h2>
+      <p>Returns the full context value. Use when you need to start a tour manually, call <code>resumeAfterTap</code>, or hook into the finish lifecycle.</p>
+
+      <pre><code class="language-tsx">import { useCoachmark } from 'lp-coachmark';
+
+const { start, resumeAfterTap, afterFinish, isActive } = useCoachmark();</code></pre>
+
+      <h3>Returned values</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Value</th>
+              <th>Type</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>start</code></td>
+              <td><code>(tabKey, fromIndex?, onFinish?) =&gt; void</code></td>
+              <td>Start the tour for the given tab. <code>fromIndex</code> defaults to <code>0</code>. <code>onFinish</code> is called when the user completes or skips the tour.</td>
+            </tr>
+            <tr>
+              <td><code>resumeAfterTap</code></td>
+              <td><code>() =&gt; void</code></td>
+              <td>Call after the user performs the action in a <code>tapHint</code> step. The overlay advances to the next step. Safe to call at any time — ignored if no tour is active.</td>
+            </tr>
+            <tr>
+              <td><code>afterFinish</code></td>
+              <td><code>(cb: () =&gt; void) =&gt; void</code></td>
+              <td>Register a one-shot callback fired immediately after the overlay disappears. Use to open a modal or navigate after the tour ends.</td>
+            </tr>
+            <tr>
+              <td><code>isActive</code></td>
+              <td><code>boolean</code></td>
+              <td><code>true</code> while a tour is in progress.</td>
+            </tr>
+            <tr>
+              <td><code>registerStep</code></td>
+              <td><code>(key, step) =&gt; void</code></td>
+              <td>Low-level: register a step manually. Prefer <code>useCoachmarkStep</code>.</td>
+            </tr>
+            <tr>
+              <td><code>unregisterStep</code></td>
+              <td><code>(key) =&gt; void</code></td>
+              <td>Low-level: unregister a step. Called automatically by <code>useCoachmarkStep</code> on unmount.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── Types ─────────────────────────────────────────── -->
+    <section id="types">
+      <h2>Types</h2>
+
+      <pre><code class="language-ts">interface CoachmarkStorage {
+  get: (key: string) =&gt; Promise&lt;string | null&gt;;
+  set: (key: string, value: string) =&gt; Promise&lt;void&gt;;
+}
+
+interface CoachmarkStep {
+  targetRef: RefObject&lt;View | null&gt;;
+  title: string;
+  description: string;
+  tabKey: string;
+  shape?: 'rect' | 'circle';
+  padding?: number;
+  scrollRef?: RefObject&lt;ScrollView | null&gt;;
+  scrollOffset?: number;
+  clampToScreen?: boolean;
+  tapHint?: boolean;
+  onTap?: () =&gt; void;
+  hidePrev?: boolean;
+}
+
+interface CoachmarkMeasure {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}</code></pre>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ─── Examples ──────────────────────────────────────── -->
+    <section id="ex-basic">
+      <h2>Basic step</h2>
+      <p>The simplest possible coachmark: one highlighted button, auto-started when the tab gains focus.</p>
+
+      <pre><code class="language-tsx">export default function HomeScreen() {
+  useTabCoachmark('home');
+
+  const addRef = useCoachmarkStep({
+    key: 'home-add',
+    tabKey: 'home',
+    title: 'Create your first item',
+    description: 'Tap the button below to get started.',
+  });
+
+  return (
+    &lt;View style={{ flex: 1 }}&gt;
+      &lt;TouchableOpacity ref={addRef}&gt;
+        &lt;Text&gt;+ Add&lt;/Text&gt;
+      &lt;/TouchableOpacity&gt;
+    &lt;/View&gt;
+  );
+}</code></pre>
+    </section>
+
+    <section id="ex-multiple">
+      <h2>Multiple steps in order</h2>
+      <p>Steps are displayed in the order the hooks run in the component — top to bottom.</p>
+
+      <pre><code class="language-tsx">export default function DashboardScreen() {
+  useTabCoachmark('dashboard');
+
+  const searchRef = useCoachmarkStep({
+    key: 'dashboard-search', // step 1
+    tabKey: 'dashboard',
+    title: 'Search',
+    description: 'Find anything quickly using the search bar.',
+  });
+
+  const chartRef = useCoachmarkStep({
+    key: 'dashboard-chart',  // step 2
+    tabKey: 'dashboard',
+    title: 'Your statistics',
+    description: 'Here you can see your progress over time.',
+    padding: 12,
+  });
+
+  const profileRef = useCoachmarkStep({
+    key: 'dashboard-profile', // step 3
+    tabKey: 'dashboard',
+    title: 'Profile settings',
+    description: 'Tap your avatar to open account settings.',
+    shape: 'circle',
+  });
+
+  return (
+    &lt;View&gt;
+      &lt;View ref={searchRef}&gt;&lt;SearchBar /&gt;&lt;/View&gt;
+      &lt;View ref={chartRef}&gt;&lt;Chart /&gt;&lt;/View&gt;
+      &lt;View ref={profileRef}&gt;&lt;Avatar /&gt;&lt;/View&gt;
+    &lt;/View&gt;
+  );
+}</code></pre>
+    </section>
+
+    <section id="ex-circle">
+      <h2>Circle spotlight</h2>
+      <p>Use <code>shape: 'circle'</code> for round buttons, icons, or avatar-like elements.</p>
+
+      <pre><code class="language-tsx">const micRef = useCoachmarkStep({
+  key: 'record-mic',
+  tabKey: 'record',
+  title: 'Record audio',
+  description: 'Hold this button to start recording.',
+  shape: 'circle',
+  padding: 16,
+});
+
+return &lt;TouchableOpacity ref={micRef}&gt;&lt;MicIcon /&gt;&lt;/TouchableOpacity&gt;;</code></pre>
+    </section>
+
+    <section id="ex-scroll">
+      <h2>Auto-scroll to a step</h2>
+      <p>
+        If the target element is inside a <code>ScrollView</code> and might be off-screen, pass
+        <code>scrollRef</code> so the overlay scrolls to it automatically before showing the tooltip.
+      </p>
+
+      <pre><code class="language-tsx">export default function ListScreen() {
+  useTabCoachmark('list');
+  const scrollRef = useRef&lt;ScrollView&gt;(null);
+
+  const lastItemRef = useCoachmarkStep({
+    key: 'list-last-item',
+    tabKey: 'list',
+    title: 'Swipe to delete',
+    description: 'Swipe any row to the left to reveal delete.',
+    scrollRef,       // overlay will scroll this ScrollView
+    scrollOffset: 40 // extra offset in px (optional)
+  });
+
+  return (
+    &lt;ScrollView ref={scrollRef}&gt;
+      {items.map((item) =&gt; &lt;Row key={item.id} /&gt;)}
+      &lt;View ref={lastItemRef}&gt;
+        &lt;LastRow /&gt;
+      &lt;/View&gt;
+    &lt;/ScrollView&gt;
+  );
+}</code></pre>
+    </section>
+
+    <section id="ex-taphint">
+      <h2>tapHint mode — "do it yourself" step</h2>
+      <p>
+        In <code>tapHint</code> mode the tooltip is hidden and a pulsing hand icon appears over the
+        spotlight. The user must tap the highlighted element. Call <code>resumeAfterTap()</code> inside
+        <code>onTap</code> to advance the tour.
+      </p>
+
+      <pre><code class="language-tsx">export default function OnboardingScreen() {
+  useTabCoachmark('onboarding');
+  const { resumeAfterTap } = useCoachmark();
+
+  const swipeCardRef = useCoachmarkStep({
+    key: 'onboarding-swipe',
+    tabKey: 'onboarding',
+    title: '',       // not shown in tapHint mode
+    description: '',
+    tapHint: true,
+    onTap: () => {
+      performSwipeAnimation(); // trigger the real action
+      resumeAfterTap();        // advance to next step
+    },
+  });
+
+  const nextRef = useCoachmarkStep({
+    key: 'onboarding-done',
+    tabKey: 'onboarding',
+    title: 'Great!',
+    description: 'You just learned how to swipe a card.',
+    hidePrev: true, // can't go back after the swipe
+  });
+
+  return (
+    &lt;View&gt;
+      &lt;View ref={swipeCardRef}&gt;&lt;Card /&gt;&lt;/View&gt;
+      &lt;View ref={nextRef}&gt;&lt;ResultView /&gt;&lt;/View&gt;
+    &lt;/View&gt;
+  );
+}</code></pre>
+    </section>
+
+    <section id="ex-conditional">
+      <h2>Conditional step</h2>
+      <p>
+        Use the <code>enabled</code> option to include a step only for certain users — based on role,
+        feature flag, or subscription tier.
+      </p>
+
+      <pre><code class="language-tsx">const { isPremium } = useUser();
+
+const premiumRef = useCoachmarkStep({
+  key: 'home-premium-badge',
+  tabKey: 'home',
+  title: 'Upgrade to Premium',
+  description: 'Unlock all features with a Premium subscription.',
+  enabled: !isPremium, // only show for free-tier users
+});</code></pre>
+    </section>
+
+    <section id="ex-manual">
+      <h2>Manual trigger</h2>
+      <p>Start the tour from any interaction — a help button, a menu item, or a settings toggle.</p>
+
+      <pre><code class="language-tsx">import { useCoachmark } from 'lp-coachmark';
+
+function HelpButton() {
+  const { start } = useCoachmark();
+
+  return (
+    &lt;TouchableOpacity onPress={() =&gt; start('home', 0)}&gt;
+      &lt;Text&gt;Replay tour&lt;/Text&gt;
+    &lt;/TouchableOpacity&gt;
+  );
+}</code></pre>
+    </section>
+
+    <section id="ex-after">
+      <h2>Action after the tour ends</h2>
+      <p>
+        Use <code>afterFinish</code> to open a modal, navigate, or trigger any side-effect right after
+        the overlay disappears.
+      </p>
+
+      <pre><code class="language-tsx">import { useCoachmark } from 'lp-coachmark';
+
+function HomeScreen() {
+  const { afterFinish } = useCoachmark();
+
+  useEffect(() => {
+    afterFinish(() => {
+      router.push('/create'); // open create screen once tour is done
+    });
+  }, []);
+}</code></pre>
+
+      <div class="callout">
+        <span class="callout-icon">ℹ️</span>
+        <code>afterFinish</code> registers a <strong>one-shot</strong> callback — it fires once and is
+        then cleared automatically.
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ─── TOC ─────────────────────────────────────────────── -->
+  <aside id="toc">
+    <div id="toc-inner">
+      <h4>≡ On this page</h4>
+      <a class="toc-link" href="#intro">Introduction</a>
+      <a class="toc-link" href="#installation">Installation</a>
+      <a class="toc-link" href="#quick-start">Quick start</a>
+      <a class="toc-link" href="#storage">Storage adapters</a>
+      <a class="toc-link" href="#provider">CoachmarkProvider</a>
+      <a class="toc-link" href="#use-step">useCoachmarkStep</a>
+      <a class="toc-link" href="#use-tab">useTabCoachmark</a>
+      <a class="toc-link" href="#use-coachmark">useCoachmark</a>
+      <a class="toc-link" href="#types">Types</a>
+      <a class="toc-link" href="#ex-basic">Basic step</a>
+      <a class="toc-link" href="#ex-multiple">Multiple steps</a>
+      <a class="toc-link" href="#ex-circle">Circle spotlight</a>
+      <a class="toc-link" href="#ex-scroll">Auto-scroll</a>
+      <a class="toc-link" href="#ex-taphint">tapHint mode</a>
+      <a class="toc-link" href="#ex-conditional">Conditional step</a>
+      <a class="toc-link" href="#ex-manual">Manual trigger</a>
+      <a class="toc-link" href="#ex-after">afterFinish</a>
+    </div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+<script>
+  // ── Active nav + TOC on scroll ──────────────────────────
+  const allLinks = [...document.querySelectorAll('.nav-link, .toc-link')];
+  const sections = [...document.querySelectorAll('section[id], h2[id]')];
+
+  function getActive() {
+    const scrollY = window.scrollY + 120;
+    let current = sections[0]?.id ?? '';
+    for (const s of sections) {
+      if (s.offsetTop <= scrollY) current = s.id;
+    }
+    return current;
+  }
+
+  function updateLinks() {
+    const id = getActive();
+    allLinks.forEach((a) => {
+      const href = a.getAttribute('href')?.slice(1);
+      a.classList.toggle('active', href === id);
+    });
+  }
+
+  window.addEventListener('scroll', updateLinks, { passive: true });
+  updateLinks();
+
+  // ── Search ───────────────────────────────────────────────
+  const searchInput   = document.getElementById('search-input');
+  const searchResults = document.getElementById('search-results');
+
+  // Build index: one entry per section
+  const index = [];
+  document.querySelectorAll('section[id]').forEach((sec) => {
+    const id      = sec.id;
+    const heading = sec.querySelector('h1, h2, h3');
+    const title   = heading ? heading.textContent.trim() : id;
+
+    // fullText — весь текст секції для пошуку (без обмеження довжини)
+    // Збираємо: параграфи, комірки таблиць (prop/option назви), елементи списків, code-елементи
+    const textParts = [];
+    sec.querySelectorAll('p, td, li, code, h3').forEach((el) => {
+      const t = el.textContent.trim();
+      if (t) textParts.push(t);
+    });
+    const fullText = textParts.join(' ').replace(/\s+/g, ' ');
+
+    // excerpt — короткий уривок для відображення (перші 160 символів з параграфів)
+    let excerptRaw = '';
+    sec.querySelectorAll('p').forEach((el) => {
+      if (excerptRaw.length < 300) excerptRaw += ' ' + el.textContent;
+    });
+    // fallback: якщо параграфів нема — беремо з fullText
+    if (!excerptRaw.trim()) excerptRaw = fullText;
+    const excerpt = excerptRaw.replace(/\s+/g, ' ').trim().slice(0, 160);
+
+    index.push({ id, title, fullText: fullText.toLowerCase(), excerpt });
+  });
+
+  function highlight(text, q) {
+    if (!q) return text;
+    const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return text.replace(re, '<mark>$1</mark>');
+  }
+
+  // Знайти уривок тексту навколо знайденого слова для відображення
+  function getMatchExcerpt(entry, trimmed) {
+    const idx = entry.fullText.indexOf(trimmed);
+    if (idx === -1) return entry.excerpt;
+    // знайти той самий шматок в оригінальному (не lowercase) fullText
+    const raw = entry.excerpt; // fallback
+    // шукаємо в оригінальних частинах через section
+    const sec = document.getElementById(entry.id);
+    if (!sec) return raw;
+    const parts = [];
+    sec.querySelectorAll('p, td, li').forEach((el) => {
+      const t = el.textContent.trim();
+      if (t.toLowerCase().includes(trimmed)) parts.push(t);
+    });
+    if (parts.length === 0) return raw;
+    const best = parts[0].replace(/\s+/g, ' ');
+    const pos  = best.toLowerCase().indexOf(trimmed);
+    const start = Math.max(0, pos - 40);
+    return (start > 0 ? '…' : '') + best.slice(start, start + 160);
+  }
+
+  let focusIdx = -1;
+
+  function renderResults(q) {
+    const trimmed = q.trim().toLowerCase();
+    if (!trimmed) { closeSearch(); return; }
+
+    const hits = index.filter((e) =>
+      e.title.toLowerCase().includes(trimmed) ||
+      e.fullText.includes(trimmed)
+    );
+
+    focusIdx = -1;
+    if (hits.length === 0) {
+      searchResults.innerHTML = '<div class="sr-empty">No results for <strong>"' + q + '"</strong></div>';
+    } else {
+      searchResults.innerHTML = hits.map((h, i) => `
+        <a class="sr-item" href="#${h.id}" data-idx="${i}">
+          <div class="sr-title">${highlight(h.title, trimmed)}</div>
+          <div class="sr-excerpt">${highlight(getMatchExcerpt(h, trimmed), trimmed)}</div>
+        </a>`).join('');
+    }
+    searchResults.classList.add('open');
+  }
+
+  function closeSearch() {
+    searchResults.classList.remove('open');
+    focusIdx = -1;
+  }
+
+  searchInput.addEventListener('input', (e) => renderResults(e.target.value));
+
+  searchInput.addEventListener('keydown', (e) => {
+    const items = [...searchResults.querySelectorAll('.sr-item')];
+    if (!items.length) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusIdx = Math.min(focusIdx + 1, items.length - 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusIdx = Math.max(focusIdx - 1, 0);
+    } else if (e.key === 'Enter' && focusIdx >= 0) {
+      e.preventDefault();
+      items[focusIdx].click();
+    } else if (e.key === 'Escape') {
+      closeSearch();
+      searchInput.blur();
+    } else { return; }
+
+    items.forEach((el, i) => el.classList.toggle('sr-focused', i === focusIdx));
+    if (focusIdx >= 0) items[focusIdx].scrollIntoView({ block: 'nearest' });
+  });
+
+  searchResults.addEventListener('click', (e) => {
+    const item = e.target.closest('.sr-item');
+    if (item) { searchInput.value = ''; closeSearch(); }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('search-wrap').contains(e.target)) closeSearch();
+  });
+
+  // Keyboard shortcut: Ctrl+Shift+F (будь-яка розкладка — перевіряємо фізичну клавішу)
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.code === 'KeyF') {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+  });
+</script>
+</body>
+</html>

@@ -5,27 +5,27 @@ import { useCoachmark } from './CoachmarkContext';
 import type { CoachmarkStep } from './types';
 
 interface Options {
-  /** унікальний ключ, визначає порядок реєстрації */
+  /** unique key, determines registration order */
   key: string;
-  /** вкладка до якої належить крок — має збігатись з tabKey у useTabCoachmark */
+  /** tab this step belongs to — must match tabKey in useTabCoachmark */
   tabKey: string;
   title: string;
   description: string;
   shape?: CoachmarkStep['shape'];
   padding?: number;
-  /** ref до ScrollView що містить цей елемент — для автоскролу */
+  /** ref to the ScrollView containing this element — for auto-scroll */
   scrollRef?: RefObject<ScrollView | null>;
-  /** зміщення скролу (default: центр екрана) */
+  /** scroll offset (default: center of screen) */
   scrollOffset?: number;
-  /** обрізати spotlight до меж екрану по осі X */
+  /** clip spotlight to screen bounds on the X axis */
   clampToScreen?: boolean;
-  /** overlay показує маску + руку; тап на spotlight викликає onTap; перехід через resumeAfterTap() */
+  /** overlay shows mask + hand; tap on spotlight calls onTap; transition via resumeAfterTap() */
   tapHint?: boolean;
-  /** викликається при тапі на spotlight-зону */
+  /** called when the spotlight zone is tapped */
   onTap?: () => void;
-  /** сховати кнопку "Назад" на цьому кроці */
+  /** hide the "Back" button on this step */
   hidePrev?: boolean;
-  /** крок реєструється тільки якщо true (default: true) */
+  /** step is registered only if true (default: true) */
   enabled?: boolean;
 }
 

@@ -2,31 +2,31 @@ import type { RefObject } from 'react';
 import type { ScrollView, View } from 'react-native';
 
 export interface CoachmarkStep {
-  /** ref до View який треба підсвітити */
+  /** ref to the View to highlight */
   targetRef: RefObject<View | null>;
   title: string;
   description: string;
-  /** до якої вкладки належить крок — використовується для фільтрації при start() */
+  /** tab this step belongs to — used for filtering when start() is called */
   tabKey: string;
   /** 'rect' (default) | 'circle' */
   shape?: 'rect' | 'circle';
-  /** відступ навколо виділеного елементу, default 8 */
+  /** padding around the highlighted element, default 8 */
   padding?: number;
-  /** ref до ScrollView який містить targetRef — для автоскролу */
+  /** ref to the ScrollView containing targetRef — for auto-scroll */
   scrollRef?: RefObject<ScrollView | null>;
-  /** зміщення скролу відносно елементу (default: центр екрана) */
+  /** scroll offset relative to the element (default: center of screen) */
   scrollOffset?: number;
-  /** обрізати spotlight до меж екрану по осі X (для елементів що ширші за екран) */
+  /** clip spotlight to screen bounds on the X axis (for elements wider than the screen) */
   clampToScreen?: boolean;
   /**
-   * Режим "зроби сам": overlay показує маску + мигаючу руку замість tooltip.
-   * Прозорий Pressable на spotlight-зоні перехоплює тап і викликає onTap.
-   * Перехід до наступного кроку — через resumeAfterTap() з контексту.
+   * "Do it yourself" mode: overlay shows mask + pulsing hand instead of tooltip.
+   * Transparent Pressable on the spotlight zone intercepts the tap and calls onTap.
+   * Transition to the next step is done via resumeAfterTap() from context.
    */
   tapHint?: boolean;
-  /** Викликається коли юзер натискає на spotlight-зону в режимі tapHint */
+  /** Called when the user taps the spotlight zone in tapHint mode */
   onTap?: () => void;
-  /** Сховати кнопку "Назад" на цьому кроці */
+  /** Hide the "Back" button on this step */
   hidePrev?: boolean;
 }
 
@@ -45,21 +45,21 @@ export interface CoachmarkStorage {
 export interface CoachmarkContextValue {
   registerStep: (key: string, step: CoachmarkStep) => void;
   unregisterStep: (key: string) => void;
-  /** запустити тур для конкретної вкладки; onFinish — після "Готово" або "Пропустити" */
+  /** start the tour for a specific tab; onFinish — after "Done" or "Skip" */
   start: (tabKey: string, fromIndex?: number, onFinish?: () => void) => void;
   /**
-   * Викликати після того як юзер виконав дію на кроці з tapHint:true —
-   * overlay повертається і показує наступний крок.
-   * Безпечно викликати завжди — ігнорує якщо тур неактивний або крок не tapHint.
+   * Call after the user performs the action on a step with tapHint:true —
+   * overlay returns and shows the next step.
+   * Safe to call at any time — ignored if the tour is inactive or the step is not tapHint.
    */
   resumeAfterTap: () => void;
   /**
-   * Зареєструвати one-shot callback який викликається одразу після завершення туру.
-   * Використовується щоб відкрити модал/виконати дію після того як overlay зник.
+   * Register a one-shot callback called immediately after the tour finishes.
+   * Used to open a modal or perform an action after the overlay has closed.
    */
   afterFinish: (cb: () => void) => void;
   isActive: boolean;
-  /** Налаштування з Provider — для useTabCoachmark */
+  /** Settings from Provider — used by useTabCoachmark */
   _config: {
     enabled: boolean;
     alwaysShow: boolean;
