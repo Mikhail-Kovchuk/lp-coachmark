@@ -12,12 +12,13 @@ import {
   Modal,
   Platform,
   Pressable,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import type { CoachmarkMeasure, CoachmarkStep } from './types';
+import type { CoachmarkMeasure, CoachmarkStep, CoachmarkLabels } from './types';
 
 const SCREEN = Dimensions.get('window');
 const OVERLAY_COLOR = 'rgba(0,0,0,0.92)';
@@ -39,6 +40,8 @@ interface Props {
   currentIndex: number;
   totalSteps: number;
   tabBarHeight: number;
+  safeAreaTop?: number;
+  labels?: CoachmarkLabels;
   onNext: () => void;
   onPrev: () => void;
   onSkip: () => void;
@@ -57,6 +60,27 @@ function measureTarget(step: CoachmarkStep): Promise<CoachmarkMeasure> {
       (x: number, y: number, width: number, height: number) => {
         resolve({ x, y, width, height });
       }
+    );
+  });
+}
+
+/**
+ * Measure the target's position relative to the ScrollView's content top.
+ * Returns null if scrollRef or targetRef is not available.
+ * This gives a stable content Y that doesn't change as the user scrolls.
+ */
+function measureTargetInScroll(step: CoachmarkStep): Promise<CoachmarkMeasure | null> {
+  return new Promise((resolve) => {
+    const ref = step.targetRef?.current;
+    const scroll = step.scrollRef?.current;
+    if (!ref || !scroll) { resolve(null); return; }
+    // Pass the ref directly (works with both old and new React Native architecture)
+    (ref as any).measureLayout(
+      scroll,
+      (x: number, y: number, width: number, height: number) => {
+        resolve({ x, y, width, height });
+      },
+      () => resolve(null)
     );
   });
 }
@@ -85,12 +109,33 @@ function spotlightGeometry(
 ) {
   const { x, y, width, height } = measure;
   let hx = Math.max(0, x - padding);
-  const hy = Math.max(0, y - padding);
+  let hy = Math.max(0, y - padding);
   let hw = width + padding * 2;
-  const hh = height + padding * 2;
+  let hh = height + padding * 2;
 
   if (clampToScreen) {
     const maxRight = SCREEN.width - SCREEN_CLAMP_MARGIN;
+    if (hx < SCREEN_CLAMP_MARGIN) hx = SCREEN_CLAMP_MARGIN;
+    if (hx + hw > maxRight) hw = maxRight - hx;
+  }
+
+  // Android: keep spotlight within visible screen area.
+  // Note: Dimensions.get('window').height excludes status bar, but Modal with
+  // statusBarTranslucent renders from the very top — so Modal height = SCREEN.height + statusBarH.
+  // Top: don't overlap status bar. Bottom: don't overflow Modal bottom.
+  // Left/Right: always keep minimum margin from screen edges.
+  if (Platform.OS === 'android') {
+    const statusBarH = StatusBar.currentHeight ?? 0;
+    const minTop = statusBarH + SCREEN_CLAMP_MARGIN;
+    // Modal total height = window height + status bar height
+    const maxBottom = SCREEN.height + statusBarH - SCREEN_CLAMP_MARGIN;
+    const maxRight = SCREEN.width - SCREEN_CLAMP_MARGIN;
+    if (hy < minTop) hy = minTop;
+    if (hy + hh > maxBottom) {
+      // Shift block up to fit; only crop height as last resort
+      hy = maxBottom - hh;
+      if (hy < minTop) { hy = minTop; hh = maxBottom - minTop; }
+    }
     if (hx < SCREEN_CLAMP_MARGIN) hx = SCREEN_CLAMP_MARGIN;
     if (hx + hw > maxRight) hw = maxRight - hx;
   }
@@ -215,6 +260,9 @@ interface TooltipProps {
   measure: CoachmarkMeasure;
   currentIndex: number;
   totalSteps: number;
+  tabBarHeight: number;
+  safeAreaTop: number;
+  labels?: CoachmarkLabels;
   fadeAnim: Animated.Value;
   slideAnim: Animated.Value;
   scaleAnim: Animated.Value;
@@ -228,6 +276,9 @@ function Tooltip({
   measure,
   currentIndex,
   totalSteps,
+  tabBarHeight,
+  safeAreaTop,
+  labels,
   fadeAnim,
   slideAnim,
   scaleAnim,
@@ -240,12 +291,26 @@ function Tooltip({
   const spotlightTop = measure.y - padding;
 
   const tooltipHeight = 180;
-  const spaceBelow = SCREEN.height - spotlightBottom - TOOLTIP_MARGIN;
+  // On Android: Modal renders from screen top (statusBarTranslucent),
+  // so total modal height = SCREEN.height + StatusBar.currentHeight
+  const statusBarH = Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0;
+  const usableBottom = SCREEN.height + statusBarH - tabBarHeight - TOOLTIP_MARGIN;
+  const spaceBelow = usableBottom - spotlightBottom;
   const showBelow = spaceBelow >= tooltipHeight || spotlightTop < tooltipHeight + TOOLTIP_MARGIN;
 
-  const tooltipTop = showBelow
+  let tooltipTop = showBelow
     ? spotlightBottom + TOOLTIP_MARGIN
     : spotlightTop - tooltipHeight - TOOLTIP_MARGIN;
+
+  // If tooltip overflows bottom, shift it up — allow it to overlap the spotlight
+  if (tooltipTop + tooltipHeight > usableBottom) {
+    tooltipTop = usableBottom - tooltipHeight;
+  }
+  // If tooltip overflows top, clamp below safe area (notch / Dynamic Island / status bar)
+  const minTop = Math.max(statusBarH, safeAreaTop) + TOOLTIP_MARGIN;
+  if (tooltipTop < minTop) {
+    tooltipTop = minTop;
+  }
 
   const isLast = currentIndex === totalSteps - 1;
 
@@ -269,7 +334,7 @@ function Tooltip({
       <View style={styles.tooltipHeader}>
         <Text style={styles.tooltipTitle}>{step.title}</Text>
         <TouchableOpacity onPress={onSkip} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Text style={styles.skipText}>Skip</Text>
+          <Text style={styles.skipText}>{labels?.skip ?? 'Skip'}</Text>
         </TouchableOpacity>
       </View>
 
@@ -284,11 +349,11 @@ function Tooltip({
         <View style={styles.navBtns}>
           {currentIndex > 0 && !step.hidePrev && (
             <TouchableOpacity style={styles.prevBtn} onPress={onPrev} activeOpacity={0.8}>
-              <Text style={styles.prevBtnText}>Back</Text>
+              <Text style={styles.prevBtnText}>{labels?.prev ?? 'Back'}</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity style={styles.nextBtn} onPress={onNext} activeOpacity={0.8}>
-            <Text style={styles.nextBtnText}>{isLast ? 'Done' : 'Next'}</Text>
+            <Text style={styles.nextBtnText}>{isLast ? (labels?.done ?? 'Done') : (labels?.next ?? 'Next')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -303,6 +368,8 @@ export default function CoachmarkOverlay({
   currentIndex,
   totalSteps,
   tabBarHeight,
+  safeAreaTop = 0,
+  labels,
   onNext,
   onPrev,
   onSkip,
@@ -419,9 +486,21 @@ export default function CoachmarkOverlay({
       const m = await measureTarget(step);
       if (cancelled) return;
 
+      // If the target element is not mounted (ref didn't find a real node),
+      // measureInWindow returns 0,0,0,0 — skip this step automatically.
+      if (m.width === 0 && m.height === 0) {
+        onNext();
+        return;
+      }
+
       if (step.scrollRef?.current) {
         const offset = step.scrollOffset ?? 0;
-        const targetScrollY = Math.max(0, m.y - visibleBottom / 2 + m.height / 2 + offset);
+        // Use content-relative position (measureLayout) for accurate scroll targeting.
+        // measureInWindow-based formulas are only correct when scroll offset = 0.
+        const contentM = await measureTargetInScroll(step);
+        const targetScrollY = contentM
+          ? Math.max(0, contentM.y - visibleBottom * 0.30 + offset)
+          : Math.max(0, m.y - visibleBottom / 2 + m.height / 2 + offset); // fallback
         step.scrollRef.current.scrollTo({ y: targetScrollY, animated: true });
 
         await new Promise<void>((r) => setTimeout(r, 400));
@@ -432,7 +511,15 @@ export default function CoachmarkOverlay({
       const finalM = await measureTarget(step);
       if (cancelled) return;
 
-      setDisplayed({ step, measure: finalM });
+      // Android: measureInWindow returns Y relative to below-status-bar,
+      // but Modal with statusBarTranslucent renders from the very top of screen.
+      // Add statusBarHeight to shift spotlight down to match the real visual position.
+      const androidYOffset = Platform.OS === 'android' ? (StatusBar.currentHeight ?? 0) : 0;
+      const adjustedM = androidYOffset > 0
+        ? { ...finalM, y: finalM.y + androidYOffset }
+        : finalM;
+
+      setDisplayed({ step, measure: adjustedM });
       setPrevIndex(currentIndex);
       animateIn(!isTransition);
     }
@@ -513,6 +600,9 @@ export default function CoachmarkOverlay({
             measure={measure}
             currentIndex={currentIndex}
             totalSteps={totalSteps}
+            tabBarHeight={tabBarHeight}
+            safeAreaTop={safeAreaTop}
+            labels={labels}
             fadeAnim={tooltipFade}
             slideAnim={tooltipSlide}
             scaleAnim={tooltipScale}

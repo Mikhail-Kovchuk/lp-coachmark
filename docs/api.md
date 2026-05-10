@@ -22,10 +22,12 @@ import { CoachmarkProvider } from 'lp-coachmark';
 | Prop | Type | Required | Default | Description |
 |---|---|:---:|---|---|
 | `children` | `ReactNode` | ✅ | — | App content |
-| `tabBarHeight` | `number` | | `0` | Height of the tab bar including safe-area inset. Used to block taps on the tab bar while the overlay is active. |
+| `tabBarHeight` | `number` | | `0` | Height of the tab bar including safe-area bottom inset. Used to block taps on the tab bar while the overlay is active. |
+| `safeAreaTop` | `number` | | `0` | Safe-area top inset (`insets.top` from `useSafeAreaInsets`). Keeps the tooltip below the notch / Dynamic Island. Pass this when using a device with a physical notch or Dynamic Island, otherwise the tooltip may render behind it. |
 | `enabled` | `boolean` | | `true` | Master switch. Set to `false` to disable all tours globally. |
 | `alwaysShow` | `boolean` | | `false` | Ignore stored "already shown" state. Useful during development. |
 | `storage` | `CoachmarkStorage` | | `undefined` | Adapter for persisting tour completion. If omitted, tours will re-run on every app launch. |
+| `labels` | `CoachmarkLabels` | | — | Custom button labels. See [`CoachmarkLabels`](#coachmarklabels). |
 
 ### `CoachmarkStorage` interface
 
@@ -150,4 +152,27 @@ interface CoachmarkMeasure {
   width: number;
   height: number;
 }
+```
+
+### `CoachmarkLabels`
+
+Override the text of any overlay button. All fields are optional — omit a field to keep the default English label.
+
+```ts
+interface CoachmarkLabels {
+  next?: string;  // default: 'Next'
+  done?: string;  // default: 'Done'
+  prev?: string;  // default: 'Back'
+  skip?: string;  // default: 'Skip'
+}
+```
+
+**Example — Ukrainian labels:**
+
+```tsx
+<CoachmarkProvider
+  labels={{ next: 'Далі', done: 'Готово', prev: 'Назад', skip: 'Пропустити' }}
+>
+  {children}
+</CoachmarkProvider>
 ```

@@ -42,6 +42,17 @@ export interface CoachmarkStorage {
   set: (key: string, value: string) => Promise<void>;
 }
 
+export interface CoachmarkLabels {
+  /** Default: 'Next' */
+  next?: string;
+  /** Default: 'Done' */
+  done?: string;
+  /** Default: 'Back' */
+  prev?: string;
+  /** Default: 'Skip' */
+  skip?: string;
+}
+
 export interface CoachmarkContextValue {
   registerStep: (key: string, step: CoachmarkStep) => void;
   unregisterStep: (key: string) => void;

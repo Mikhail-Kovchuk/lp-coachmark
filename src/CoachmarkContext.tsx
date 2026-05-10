@@ -6,7 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { CoachmarkContextValue, CoachmarkStep, CoachmarkStorage } from './types';
+import type { CoachmarkContextValue, CoachmarkStep, CoachmarkStorage, CoachmarkLabels } from './types';
 import CoachmarkOverlay from './CoachmarkOverlay';
 
 const CoachmarkContext = createContext<CoachmarkContextValue | null>(null);
@@ -19,6 +19,12 @@ interface Props {
    * Default: 0
    */
   tabBarHeight?: number;
+  /**
+   * Safe area top inset (insets.top from useSafeAreaInsets).
+   * Used to keep the tooltip below the notch / Dynamic Island / status bar.
+   * Default: 0
+   */
+  safeAreaTop?: number;
   /**
    * Disable all tours. Default: true
    */
@@ -41,14 +47,21 @@ interface Props {
    * storage={{ get: (key) => getSetting(db, key), set: (key, val) => saveSetting(db, key, val) }}
    */
   storage?: CoachmarkStorage;
+  /**
+   * Custom button labels.
+   * Defaults: next='Next', done='Done', prev='Back', skip='Skip'
+   */
+  labels?: CoachmarkLabels;
 }
 
 export function CoachmarkProvider({
   children,
   tabBarHeight = 0,
+  safeAreaTop = 0,
   enabled = true,
   alwaysShow = false,
   storage = undefined,
+  labels = undefined,
 }: Props) {
   const stepsMapRef = useRef<Map<string, CoachmarkStep>>(new Map());
   const orderedKeysRef = useRef<string[]>([]);
@@ -147,6 +160,8 @@ export function CoachmarkProvider({
           currentIndex={currentIndex}
           totalSteps={orderedSteps.length}
           tabBarHeight={tabBarHeight}
+          safeAreaTop={safeAreaTop}
+          labels={labels}
           onNext={handleNext}
           onPrev={handlePrev}
           onSkip={handleSkip}

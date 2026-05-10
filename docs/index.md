@@ -39,12 +39,15 @@ Wrap your root layout with `CoachmarkProvider`. This must be an ancestor of ever
 // app/_layout.tsx
 import { Stack } from 'expo-router';
 import { CoachmarkProvider } from 'lp-coachmark';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function RootLayout() {
+  const insets = useSafeAreaInsets();
   return (
     <CoachmarkProvider
       tabBarHeight={84}
+      safeAreaTop={insets.top}
       storage={{
         get: AsyncStorage.getItem,
         set: AsyncStorage.setItem,
@@ -57,6 +60,8 @@ export default function RootLayout() {
 ```
 
 > **Note:** `tabBarHeight` should be the total height of your tab bar including the safe-area bottom inset. This prevents the user from tapping the tab bar while the overlay is active.
+>
+> **Note:** `safeAreaTop` should be `insets.top` from `useSafeAreaInsets()`. It shifts the tooltip below the notch or Dynamic Island on devices that have one.
 
 ---
 

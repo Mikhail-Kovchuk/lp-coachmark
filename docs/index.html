@@ -674,12 +674,15 @@ yarn add lp-coachmark</code></pre>
 
       <pre><code class="language-tsx">// app/_layout.tsx
 import { CoachmarkProvider } from 'lp-coachmark';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function RootLayout() {
+  const insets = useSafeAreaInsets();
   return (
     &lt;CoachmarkProvider
       tabBarHeight={84}
+      safeAreaTop={insets.top}
       storage={{
         get: AsyncStorage.getItem,
         set: AsyncStorage.setItem,
@@ -764,9 +767,11 @@ export default function HomeScreen() {
 
 &lt;CoachmarkProvider
   tabBarHeight={84}
+  safeAreaTop={insets.top}
   enabled={true}
   alwaysShow={false}
   storage={{ get, set }}
+  labels={{ next: 'Next', done: 'Done', prev: 'Back', skip: 'Skip' }}
 &gt;
   {children}
 &lt;/CoachmarkProvider&gt;</code></pre>
@@ -796,7 +801,14 @@ export default function HomeScreen() {
               <td><code>number</code></td>
               <td class="req-no">—</td>
               <td class="default-val">0</td>
-              <td>Height of the tab bar including safe-area inset. Blocks taps on the tab bar while the overlay is active.</td>
+              <td>Height of the tab bar including safe-area bottom inset. Blocks taps on the tab bar while the overlay is active.</td>
+            </tr>
+            <tr>
+              <td><code>safeAreaTop</code></td>
+              <td><code>number</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">0</td>
+              <td>Safe-area top inset (<code>insets.top</code> from <code>useSafeAreaInsets</code>). Keeps the tooltip below the notch / Dynamic Island on devices that have one.</td>
             </tr>
             <tr>
               <td><code>enabled</code></td>
@@ -819,9 +831,42 @@ export default function HomeScreen() {
               <td class="default-val">undefined</td>
               <td>Adapter for persisting tour completion. If omitted, tours run on every app launch.</td>
             </tr>
+            <tr>
+              <td><code>labels</code></td>
+              <td><code>CoachmarkLabels</code></td>
+              <td class="req-no">—</td>
+              <td class="default-val">undefined</td>
+              <td>Override button labels. Falls back to English defaults: <code>next</code> → <em>Next</em>, <code>done</code> → <em>Done</em>, <code>prev</code> → <em>Back</em>, <code>skip</code> → <em>Skip</em>.</td>
+            </tr>
           </tbody>
         </table>
       </div>
+
+      <h3>CoachmarkLabels</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>next</code></td><td class="default-val">Next</td><td>Label for the "advance to next step" button.</td></tr>
+            <tr><td><code>done</code></td><td class="default-val">Done</td><td>Label shown instead of <code>next</code> on the last step.</td></tr>
+            <tr><td><code>prev</code></td><td class="default-val">Back</td><td>Label for the "go to previous step" button.</td></tr>
+            <tr><td><code>skip</code></td><td class="default-val">Skip</td><td>Label for the dismiss-tour button.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre><code class="language-tsx">// Example: Ukrainian labels
+&lt;CoachmarkProvider
+  labels={{ next: 'Далі', done: 'Готово', prev: 'Назад', skip: 'Пропустити' }}
+&gt;
+  {children}
+&lt;/CoachmarkProvider&gt;</code></pre>
     </section>
 
     <!-- ─── useCoachmarkStep ──────────────────────────────── -->

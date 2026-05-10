@@ -73,12 +73,15 @@ yarn add lp-coachmark
 ```tsx
 // app/_layout.tsx
 import { CoachmarkProvider } from 'lp-coachmark';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function RootLayout() {
+  const insets = useSafeAreaInsets();
   return (
     <CoachmarkProvider
       tabBarHeight={84}
+      safeAreaTop={insets.top}
       storage={{
         get: AsyncStorage.getItem,
         set: AsyncStorage.setItem,
