@@ -22,7 +22,7 @@ Highlights a UI element with a spotlight cutout, shows a tooltip with title and 
     <tr>
       <td align="center"><img src="https://raw.githubusercontent.com/Mikhail-Kovchuk/lp-coachmark/main/assets/ex1.png" width="220" alt="Theme step" /></td>
       <td align="center"><img src="https://raw.githubusercontent.com/Mikhail-Kovchuk/lp-coachmark/main/assets/ex2.png" width="220" alt="Calendar legend step" /></td>
-      <td align="center"><img src="https://raw.githubusercontent.com/Mikhail-Kovchug/lp-coachmark/main/assets/ex3.png" width="220" alt="Circle spotlight" /></td>
+      <td align="center"><img src="https://raw.githubusercontent.com/Mikhail-Kovchuk/lp-coachmark/main/assets/ex3.png" width="220" alt="Circle spotlight" /></td>
     </tr>
     <tr>
       <td align="center"><sub>Tooltip on any UI element</sub></td>
